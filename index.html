@@ -1,30 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <title>The Recipe Cupboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="Description" content="Work out which of your favourite recipes you can make with the contents of your fridge.">
-</head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="Description"
+      content="Work out which of your favourite recipes you can make with the contents of your fridge."
+    />
+    <link rel="stylesheet" type="text/css" href="reset.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat&family=Nunito+Sans&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
+  <body>
     <h1>The Recipe Cupboard</h1>
-    <form action="/where-the-data-is-sent" method="post">
-        <ul>
-            <li>
-                <label for="recipe name">Name of recipe</label>
-                <input type="text" id="recipe name" name="recipe name">
-            </li>
-            <li>
-                <label for="ingredients list">List of ingredients</label>
-                <input type="text" id="ingredients list" name="ingredients list">
-            </li>
-            <li>
-                <button type="reset">Save your recipe</button>
-            </li>
-        </ul>
-
+    <h2>Add your recipes</h2>
+    <form action="/where-the-data-is-sent" method="post" id="saveRecipe">
+      <ul>
+        <li>
+          <label for="name">Name of recipe</label>
+          <input type="text" id="name" name="name" />
+        </li>
+        <li>
+          <label for="ingredients">List of ingredients</label>
+          <input type="text" id="ingredients" name="ingredients" />
+        </li>
+        <li>
+          <button type="submit">Save your recipe</button>
+        </li>
+      </ul>
     </form>
-</body>
+    <h3>Your saved recipes</h3>
+    <ul id="recipes"></ul>
+    <h2>Search by ingredients</h2>
+    <form action="/where-the-data-is-sent" method="post" id="search">
+      <ul>
+        <li>
+          <label for="ingredients">List of ingredients</label>
+          <input type="text" id="ingredients" name="ingredients" />
+        </li>
+        <li>
+          <button type="submit">Find a recipe</button>
+        </li>
+      </ul>
+    </form>
+    <h3>Recipes you could make</h3>
+    <ul id="matches"></ul>
+    <script>
+      showRecipes();
+      const addRecipeForm = document.querySelector("#saveRecipe"); // find our form in the document
+      addRecipeForm.addEventListener("submit", function (event) {
+        // we are taking control the form and preventing broswer submitting
+        event.preventDefault();
+        // Get the form data from the event object
+        const formData = new FormData(event.target).entries();
+        // Transform the form data we've got into an object
+        const recipeData = Object.fromEntries(formData);
+        // Put everything in lower case
+        recipeData.name = recipeData.name.toLowerCase();
+        recipeData.ingredients = recipeData.ingredients.toLowerCase();
+        // Create an array of ingredients for a recipe
+        recipeData.ingredients = recipeData.ingredients.split(/\s*(?:,|$)\s*/);
+        addRecipe(recipeData);
+      });
+      function addRecipe(recipe) {
+        const recipes = getRecipes();
+        recipes.push(recipe);
+        //Save the recipes in the local storage and turn the recipes into JSON
+        localStorage.setItem("recipes", JSON.stringify(recipes));
+        //Clear the form when user presses submit
+        event.target.reset();
+        // Show the list of recipes when they click submit
+        showRecipes();
+      }
+      function getRecipes() {
+        const data = localStorage.getItem("recipes");
+        return data ? JSON.parse(data) : [];
+      }
+      function showRecipes() {
+        const recipes = getRecipes();
+        const list = document.querySelector("#recipes");
+        list.innerHTML = "";
+        recipes.forEach(function (recipe) {
+          const entry = document.createElement("li");
+          entry.innerText = recipe.name;
+          list.appendChild(entry);
+        });
+      }
+      const searchForm = document.querySelector("#search"); // find our form in the document
+      searchForm.addEventListener("submit", function (event) {
+        // we are taking control the form and preventing broswer submitting
+        event.preventDefault();
+        // Get the form data from the event object
+        const formData = new FormData(event.target).entries();
+        const ingredients = Object.fromEntries(formData)
+          .ingredients.toLowerCase()
+          .split(/\s*(?:,|$)\s*/);
+        const matches = findMatches(ingredients);
+        showMatches(matches);
+      });
+      function findMatches(ingredients) {
+        const recipes = getRecipes();
+        const matches = [];
+        recipes.forEach(function (recipe) {
+          let ingrMatch = [];
 
+          ingredients.forEach(function (ingredient) {
+            if (recipe.ingredients.includes(ingredient)) {
+              ingrMatch.push(ingredient);
+            }
+          });
+
+          if (ingrMatch.length) {
+            matches.push({ recipe, ingredients: ingrMatch });
+          }
+        });
+        return matches;
+      }
+      function showMatches(matches) {
+        const list = document.querySelector("#matches");
+        list.innerHTML = "";
+        if (matches.length) {
+          matches.forEach(function (match) {
+            const entry = document.createElement("li");
+            entry.innerText = match.recipe.name;
+            list.appendChild(entry);
+          });
+        } else {
+          alert("no matches");
+        }
+      }
+    </script>
+  </body>
 </html>

@@ -1,0 +1,24 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    width: 600px;  
+    padding: 0 20px 20px 20px;
+    display: block;
+}
+
+h1, h2, h3 {
+    font-family: 'Nunito Sans', sans-serif;
+    padding: 10px 0;
+}
+
+form {
+    background: rgba( 182, 190, 190, 0.40 );
+    box-shadow: 0 8px 32px 0 rgba(24, 25, 36, 0.37);
+    backdrop-filter: blur( 6.0px );
+    -webkit-backdrop-filter: blur( 6.0px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+
+form ul {
+    list-style-type: none;
+}
